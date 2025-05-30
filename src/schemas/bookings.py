@@ -11,8 +11,10 @@ class BookingAdd(BaseModel):
     price: int
 
 class BookingAddRequst(BaseModel):
+    room_id: int
     date_from: date
     date_to: date
+    
 
 
 class Booking(BookingAdd):

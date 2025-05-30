@@ -5,9 +5,9 @@ from config import settings
 
 engine = create_async_engine(settings.DB_URL)
 
-async_sessionmaker_maker = async_sessionmaker(bind=engine, expire_on_commit=False)
+async_session_maker = async_sessionmaker(bind=engine, expire_on_commit=False)
 
-session = async_sessionmaker_maker()
+session = async_session_maker()
 
 
 class Base(DeclarativeBase):
