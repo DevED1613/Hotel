@@ -1,4 +1,4 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Body
 
 from src.schemas.facilities import FacilityAdd
 from src.api.dependencies import DBDep
@@ -12,7 +12,7 @@ async def get_all_facilities(db: DBDep):
 @router.post("")
 async def create_facility(
     db: DBDep,
-    facility_data: FacilityAdd
+    facility_data: FacilityAdd = Body()
 ):
     facility =  await db.facilities.add(facility_data)
     await db.commit()

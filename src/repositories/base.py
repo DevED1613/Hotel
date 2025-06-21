@@ -9,8 +9,12 @@ class BaseRepository:
     def __init__(self, session):
         self.session = session
 
-    async def get_filtered(self, **filter_by):
-        query = select(self.model).filter_by(**filter_by)
+    async def get_filtered(self, *filter, **filter_by) -> list:
+        query = (
+            select(self.model)
+            .filter(*filter)
+            .filter_by(**filter_by)
+        )
         result = await self.session.execute(query)
         return [
             self.schema.model_validate(model, from_attributes=True)
@@ -29,13 +33,17 @@ class BaseRepository:
         return self.schema.model_validate(model, from_attributes=True)
 
 
-    async def add(self, data: BaseModel): # type: ignore
+    async def add(self, data: BaseModel) -> None: # type: ignore
         add_data_stmt = (
             insert(self.model).values(**data.model_dump()).returning(self.model)
         )
         result = await self.session.execute(add_data_stmt)
         model = result.scalars().first()
         return self.schema.model_validate(model, from_attributes=True)
+    
+    async def add_bulk(self, data: list[BaseModel]): # type: ignore
+        add_data_stmt = (insert(self.model).values([item.model_dump() for item in data]))
+        await self.session.execute(add_data_stmt)
 
     async def edit(
         self, data: BaseModel, exclude_unset: bool = False, **filter_by # type: ignore
@@ -46,6 +54,7 @@ class BaseRepository:
             .values(**data.model_dump(exclude_unset=exclude_unset))
         )
         await self.session.execute(update_data_stmt)
+
 
     async def delete(self, **filter_by) -> None:
         delete_start = delete(self.model).filter_by(**filter_by)

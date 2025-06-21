@@ -1,3 +1,5 @@
+from datetime import date
+
 from fastapi import Query, Body, APIRouter
 
 from src.schemas.hotels import HotelAdd, HotelPatch
@@ -14,13 +16,18 @@ async def get_hotels(
     db: DBDep,
     title: str | None = Query(None, description="Название отеля"),
     location: str | None = Query(None, description="Адрес отеля"),
+    date_from: date = Query(example="2024-08-01", description="Дата заезда"),
+    date_to: date = Query(example="2024-08-10", description="Дата выезда"),
 ):
-    return await db.hotels.get_all(
+    return await db.hotels.get_filtered_by_time(
+        date_from=date_from,
+        date_to=date_to,
         location=location,
         title=title,
         limit=pagintation.per_page,
-        offset=(pagintation.page - 1) * pagintation.per_page,
-    )
+        offset=(pagintation.page - 1) * pagintation.per_page
+    ) 
+
 
 
 @router.get("/{hotel_id}", description="Получение отеля по ID")
