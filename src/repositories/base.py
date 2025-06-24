@@ -1,13 +1,12 @@
 from pydantic import BaseModel
 from sqlalchemy import select, insert, update, delete
-from sqlalchemy.orm import selectinload
 
-from src.schemas.rooms import RoomWithFacilities
+from src.repositories.mappers.base import DataMapper
 
 
 class BaseRepository:
     model = None
-    schema = BaseModel = None
+    mapper : DataMapper = None
 
     def __init__(self, session):
         self.session = session
@@ -20,25 +19,20 @@ class BaseRepository:
         )
         result = await self.session.execute(query)
         return [
-            self.schema.model_validate(model, from_attributes=True)
+            self.mapper.map_to_domain_entity(model)
             for model in result.scalars().all()
         ]
 
     async def get_all(self, *args, **kwargs):
-        return await self.get_filtered()
+        return await self.get_filtered(*args, **kwargs)
 
     async def get_one_or_none(self, **filter_by):
-        query = (
-            select(self.model)
-            .options(selectinload(self.model.facilities))
-            .filter_by(**filter_by)
-        )
-
+        query = select(self.model).filter_by(**filter_by)
         result = await self.session.execute(query)
-        model = result.scalars().unique().one_or_none()
+        model = result.scalars().one_or_none()
         if model is None:
             return None
-        return [RoomWithFacilities.model_validate(model, from_attributes=True)]
+        return self.mapper.map_to_domain_entity(model)
 
 
     async def add(self, data: BaseModel) -> None: # type: ignore
@@ -47,7 +41,7 @@ class BaseRepository:
         )
         result = await self.session.execute(add_data_stmt)
         model = result.scalars().first()
-        return self.schema.model_validate(model, from_attributes=True)
+        return self.mapper.map_to_domain_entity(model)
     
     async def add_bulk(self, data: list[BaseModel]): # type: ignore
         add_data_stmt = (insert(self.model).values([item.model_dump() for item in data]))

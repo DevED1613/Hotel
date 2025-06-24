@@ -63,7 +63,7 @@ async def update_room(
     _room_data = RoomAdd(hotel_id=hotel_id, **room_data.model_dump())
     await db.rooms.edit(_room_data, id=room_id, hotel_id=hotel_id)
     rooms_facilities_data = {RoomFacilityAdd(room_id=room_id, facility_id=f_id) for f_id in room_data.facilities_ids}
-    await db.rooms_facilities.update_facilities(rooms_facilities_data)
+    await db.rooms_facilities.update_facilities(data=rooms_facilities_data, room_id=room_id)
     await db.commit()
     return {"status": "OK"}
 
@@ -77,8 +77,8 @@ async def update_patc_room(
     )
     await db.rooms.edit(_room_data, exclude_unset=True, id=room_id, hotel_id=hotel_id)
     if room_data.facilities_ids:
-        rooms_facilities_data = {RoomFacilityAdd(room_id=room_id, facility_id=f_id) for f_id in room_data.facilities_ids}
-        await db.rooms_facilities.update_facilities(rooms_facilities_data)
+        rooms_facilities_data = [RoomFacilityAdd(room_id=room_id, facility_id=f_id) for f_id in room_data.facilities_ids]
+        await db.rooms_facilities.update_facilities(data=rooms_facilities_data, room_id=room_id)
     await db.commit()
     return {"status": "OK"}
 
