@@ -26,7 +26,6 @@ def get_current_user_id(token: str = Depends(get_token)):
 
 UserIdDep = Annotated[int, Depends(get_current_user_id)]
 
-
 async def get_db():
     async with DBManager(session=async_session_maker) as session:
         yield session
