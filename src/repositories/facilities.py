@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 from sqlalchemy import delete, insert, select
 
-from Hotels.src.repositories.mappers.mappers import FacilitiesDataMapper, RoomFacilityDataMapper
+from src.repositories.mappers.mappers import FacilitiesDataMapper, RoomFacilityDataMapper
 from src.models.facilities import FacilitiesOrm, RoomsFacilitiesOrm
 from src.repositories.base import BaseRepository
 
