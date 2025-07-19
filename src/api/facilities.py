@@ -4,9 +4,10 @@ from fastapi_cache.decorator import cache
 from fastapi import APIRouter, Body
 
 
+from src.tasks.task import test_task
 from src.schemas.facilities import FacilityAdd
 from src.api.dependencies import DBDep
-from src.init import redis_manager
+
 
 router = APIRouter(prefix="/facilities", tags=["Удобства"])
 
@@ -21,6 +22,8 @@ async def get_all_facilities(db: DBDep):
 async def create_facility(db: DBDep, facility_data: FacilityAdd = Body()):
     facility = await db.facilities.add(facility_data)
     await db.commit()
+
+    test_task.delay()
 
     return {"status": "OK", "data": facility}
 
