@@ -1,15 +1,18 @@
+import asyncio
 from time import sleep
 
 from PIL import Image
 import os
 
+from src.utils.db_manger import DBManager
 from src.tasks.celery_app import celery_instance
-
+from src.database import async_session_maker_null_poll
 
 @celery_instance.task
 def test_task():
     sleep(5)
     print("Task done")
+
 
 @celery_instance.task
 def resize_image(input_path: str):
@@ -41,3 +44,13 @@ def resize_image(input_path: str):
     except Exception as e:
         print(f"Ошибка при обработке изображения: {str(e)}")
 
+
+async def get_booking_for_today_checkin_helper():
+    async with DBManager(session=async_session_maker_null_poll) as db:
+        bookings = await db.bookings.get_booking_for_today_checkin()
+        print(f"{bookings=}")
+
+
+@celery_instance.task(name="booking_today_checkin")
+def send_email_to_users_with_today_checkin():
+    asyncio.run(get_booking_for_today_checkin_helper())
