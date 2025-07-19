@@ -40,4 +40,4 @@ class RoomsRepository(BaseRepository):
         model = result.scalars().unique().one_or_none()
         if model is None:
             return None
-        return [RoomWithFacilDataMapper.map_to_domain_entity(model)]
+        return RoomWithFacilDataMapper.map_to_domain_entity(model)

@@ -23,7 +23,6 @@ async def create_booking(
     ):
     user = await db.users.get_one_or_none(id=user)
     price = await db.rooms.get_one_or_none(id=booking_data.room_id)
-    print(user)
     _booking_data = BookingAdd(
         user_id=user.id,
         price=price.price,

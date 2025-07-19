@@ -2,7 +2,7 @@ from pydantic import EmailStr
 from sqlalchemy import select
 
 from src.repositories.mappers.mappers import UserDataMapper, UserInDBMapper
-from repositories.base import BaseRepository
+from src.repositories.base import BaseRepository
 from src.models.users import UsersOrm
 
 
@@ -16,7 +16,7 @@ class UsersRepository(BaseRepository):
         model = result.scalars().one_or_none()
         if not model:
             return None
-        return UserInDBMapper(model)
+        return UserInDBMapper.map_to_domain_entity(model)
 
 
     
