@@ -1,7 +1,11 @@
-from pathlib import Path    
+from pathlib import Path
+from typing import Literal
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+
 class Setting(BaseSettings):
+    MODE: Literal["TEST", "LOCAL", "DEV", "PROD"]
+
     DB_HOST: str
     DB_PORT: int
     DB_USER: str
@@ -23,8 +27,10 @@ class Setting(BaseSettings):
         env_file=Path(__file__).parent.parent / ".env",
         env_file_encoding="utf-8",
     )
+
     JWT_SECRET_KEY: str
     JWT_ALGORITHM: str
     ACCESS_TOKEN_EXPIRE_MINUTES: int
+
 
 settings = Setting()
