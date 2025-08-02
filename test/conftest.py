@@ -5,16 +5,24 @@ import pytest
 from httpx import AsyncClient, ASGITransport
 import pytest_asyncio
 
+from src.schemas.hotels import HotelAdd
+from src.schemas.rooms import RoomAdd
+from src.utils.db_manger import DBManager
 from src.config import settings
-from src.database import Base, engine_null_pool
+from src.database import Base, engine_null_pool, async_session_maker_null_poll
 from src.models import *
 from src.main import app
 
-BASE_DIR = Path(__file__).parent
+BASE_DIR = Path(__file__).resolve().parent
+
+@pytest.fixture(scope="function")
+async def db() -> DBManager:  # type: ignore
+    async with DBManager(session=async_session_maker_null_poll) as db:
+        yield db
 
 
 @pytest_asyncio.fixture(scope="session")
-async def async_client():
+async def async_client() -> AsyncClient:  # type: ignore
     async with AsyncClient(
         transport=ASGITransport(app=app), base_url="http://test"
     ) as ac:
@@ -42,19 +50,16 @@ async def register_user(setup_database, async_client: AsyncClient):
 
 
 @pytest.fixture(scope="session", autouse=True)
-async def add_hotels_and_rooms_in_DB(setup_database, async_client: AsyncClient):
-    with open(BASE_DIR / "unit_tests/mock_hotels.json", "r") as f:
+async def add_hotels_and_rooms_in_DB(setup_database):
+    with open(BASE_DIR / "mock_hotels.json", encoding="utf-8") as f:
         hotels = json.load(f)
-    with open(BASE_DIR / "unit_tests/mock_rooms.json", "r") as f:
+    with open(BASE_DIR / "mock_rooms.json", encoding="utf-8") as f:
         rooms = json.load(f)
 
-    for hotel in hotels:
-        response = await async_client.post("/hotels", json=hotel)
-        assert response.status_code == 200, f"Failed to add hotel: {response.text}"
+    hotels = [HotelAdd.model_validate(hotel) for hotel in hotels]
+    rooms = [RoomAdd.model_validate(room) for room in rooms]
 
-    for room in rooms:
-       hotel_id = room["hotel_id"] 
-       response = await async_client.post(f"/hotels/{hotel_id}/rooms", json=room)
-       assert response.status_code == 200, f"Failed to add room: {response.text}"
-
-    
+    async with DBManager(session=async_session_maker_null_poll) as db_:
+        await db_.hotels.add_bulk(hotels)
+        await db_.rooms.add_bulk(rooms)
+        await db_.commit()
