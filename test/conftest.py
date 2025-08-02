@@ -5,6 +5,7 @@ import pytest
 from httpx import AsyncClient, ASGITransport
 import pytest_asyncio
 
+from src.api.dependencies import get_db
 from src.schemas.hotels import HotelAdd
 from src.schemas.rooms import RoomAdd
 from src.utils.db_manger import DBManager
@@ -15,10 +16,18 @@ from src.main import app
 
 BASE_DIR = Path(__file__).resolve().parent
 
+async def get_db_null_poll():
+    async with DBManager(session=async_session_maker_null_poll) as session:
+        yield session
+
+
 @pytest.fixture(scope="function")
 async def db() -> DBManager:  # type: ignore
-    async with DBManager(session=async_session_maker_null_poll) as db:
-        yield db
+    async for session in get_db_null_poll():
+        yield session
+
+
+app.dependency_overrides[get_db] = get_db_null_poll
 
 
 @pytest_asyncio.fixture(scope="session")
