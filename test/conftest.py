@@ -1,6 +1,9 @@
 import json
 from pathlib import Path
 import pytest
+from unittest import mock
+
+mock.patch("fastapi_cache.decorator.cache", lambda *args, **kwargs: lambda f: f).start()
 
 from httpx import AsyncClient, ASGITransport
 import pytest_asyncio
@@ -15,6 +18,7 @@ from src.models import *
 from src.main import app
 
 BASE_DIR = Path(__file__).resolve().parent
+
 
 async def get_db_null_poll():
     async with DBManager(session=async_session_maker_null_poll) as session:
@@ -72,3 +76,13 @@ async def add_hotels_and_rooms_in_DB(setup_database):
         await db_.hotels.add_bulk(hotels)
         await db_.rooms.add_bulk(rooms)
         await db_.commit()
+
+
+@pytest.fixture(scope="session", autouse=True)
+async def authenticated_ac(register_user, async_client):
+    await async_client.post(
+        "auth/login", json={"email": "huyamba@123.com", "password": "1613"}
+    )
+    token = async_client.cookies.get("access_token")
+
+    yield token
