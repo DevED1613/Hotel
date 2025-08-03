@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Body
+from fastapi import APIRouter, Body, HTTPException
 
 from src.api.dependencies import DBDep, UserIdDep
 from src.schemas.bookings import BookingAdd, BookingAddRequst
@@ -22,13 +22,18 @@ async def create_booking(
     booking_data: BookingAddRequst,
     ):
     user = await db.users.get_one_or_none(id=user)
+    if user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    
     price = await db.rooms.get_one_or_none(id=booking_data.room_id)
+    if price is None:
+        raise HTTPException(status_code=404, detail="Room not found")
     _booking_data = BookingAdd(
         user_id=user.id,
         price=price.price,
         **booking_data.model_dump()
     )
-    booking = await db.bookings.add(_booking_data)
+    booking = await db.bookings.add_booking(_booking_data)
     await db.commit()
     return {"status": "OK", "data": booking}
 
