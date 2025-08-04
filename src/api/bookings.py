@@ -18,22 +18,19 @@ async def get_booking(db: DBDep, user: UserIdDep):
 @router.post("")
 async def create_booking(
     db: DBDep,
-    user: UserIdDep,
+    user_id: UserIdDep,
     booking_data: BookingAddRequst,
     ):
-    user = await db.users.get_one_or_none(id=user)
-    if user is None:
-        raise HTTPException(status_code=404, detail="User not found")
     
-    price = await db.rooms.get_one_or_none(id=booking_data.room_id)
-    if price is None:
-        raise HTTPException(status_code=404, detail="Room not found")
+    room = await db.rooms.get_one_or_none(id=booking_data.room_id)
+    hotel = await db.hotels.get_one_or_none(id=room.hotel_id)
+    price_room = room.price
     _booking_data = BookingAdd(
-        user_id=user.id,
-        price=price.price,
+        user_id=user_id,
+        price=price_room,
         **booking_data.model_dump()
     )
-    booking = await db.bookings.add_booking(_booking_data)
+    booking = await db.bookings.add_booking(_booking_data, hotel_id=hotel.id)
     await db.commit()
     return {"status": "OK", "data": booking}
 
