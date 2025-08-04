@@ -14,7 +14,7 @@ async def register_user(data: UserRequestAdd, db: DBDep):
     new_user_data = UserAdd(email=data.email, hashed_password=hash_password)
     check_user = await db.users.get_one_or_none(email=data.email)
     if check_user:
-        raise HTTPException(status_code=400, detail="Пользователь уже зарегистрирован")
+        raise HTTPException(status_code=401, detail="Пользователь уже зарегистрирован")
     await db.users.add(new_user_data)
     await db.commit()
     return {"status": "OK"}
