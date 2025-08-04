@@ -83,6 +83,5 @@ async def authenticated_ac(register_user, async_client):
     await async_client.post(
         "auth/login", json={"email": "huyamba@123.com", "password": "1613"}
     )
-    token = async_client.cookies.get("access_token")
-
-    yield token
+    assert async_client.cookies["access_token"]
+    yield async_client

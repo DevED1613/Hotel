@@ -28,13 +28,9 @@ class BookingsRepository(BaseRepository):
 
         result = await self.session.execute(rooms_query)
         free_room_ids: list[int] = result.scalars().all()
-
-        if not free_room_ids or data.room_id not in free_room_ids:
-            raise HTTPException(status_code=400, detail="Room not available")
-
         
         if data.room_id in free_room_ids:
             new_booking = await self.add(data)
             return new_booking
         else:
-            raise Exception
+            raise HTTPException(status_code=500, detail="Бронирование невозможно")
