@@ -30,9 +30,11 @@ class UserDataMapper(DataMapper):
     db_model = UsersOrm
     schema = User
 
+
 class UserInDBMapper(DataMapper):
     db_model = UsersOrm
     schema = UserInDB
+
 
 class BookingDataMapper(DataMapper):
     db_model = BookingsOrm
@@ -43,7 +45,7 @@ class FacilitiesDataMapper(DataMapper):
     db_model = FacilitiesOrm
     schema = Facility
 
+
 class RoomFacilityDataMapper(DataMapper):
     db_model = FacilitiesOrm
     schema = RoomFacility
-

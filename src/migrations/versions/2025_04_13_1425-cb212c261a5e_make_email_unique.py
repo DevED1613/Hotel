@@ -9,7 +9,7 @@ Create Date: 2025-04-13 14:25:14.104511
 from typing import Sequence, Union
 
 from alembic import op
-import sqlalchemy as sa
+import sqlalchemy as sa  # noqa
 
 
 revision: str = "cb212c261a5e"
@@ -26,4 +26,3 @@ def upgrade() -> None:
 def downgrade() -> None:
     """Downgrade schema."""
     op.drop_constraint(None, "users", type_="unique")
-

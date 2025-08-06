@@ -16,7 +16,7 @@ from src.api.rooms import router as router_rooms
 from src.api.bookings import router as router_bookings
 from src.api.facilities import router as router_facilities
 from src.api.images import router as router_images
-from src.database import *
+from src.database import *  # noqa
 from src.init import redis_manager
 
 

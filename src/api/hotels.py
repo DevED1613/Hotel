@@ -7,7 +7,6 @@ from src.schemas.hotels import HotelAdd, HotelPatch
 from src.api.dependencies import DBDep, PaginationDep
 
 
-
 router = APIRouter(prefix="/hotels", tags=["Отели"])
 
 
@@ -27,9 +26,8 @@ async def get_hotels(
         location=location,
         title=title,
         limit=pagintation.per_page,
-        offset=(pagintation.page - 1) * pagintation.per_page
-    ) 
-
+        offset=(pagintation.page - 1) * pagintation.per_page,
+    )
 
 
 @router.get("/{hotel_id}", description="Получение отеля по ID")
@@ -54,7 +52,7 @@ async def create_hotel(
                 "value": {"title": "Отель в пустыне", "location": "Ул. Абу-Бандита 5"},
             },
         }
-    )
+    ),
 ):
     hotel = await db.hotels.add(hotel_data)
     await db.commit()
@@ -70,9 +68,7 @@ async def update_hotel(hotel_id: int, hotel_data: HotelAdd, db: DBDep):
 
 @router.patch("/{hotel_id}")
 async def update_patch_hotel(hotel_id: int, hotel_data: HotelPatch, db: DBDep):
-    await db.hotels.edit(
-        hotel_data, exclude_unset=True, id=hotel_id
-    )
+    await db.hotels.edit(hotel_data, exclude_unset=True, id=hotel_id)
     await db.commit()
     return {"status": "OK"}
 

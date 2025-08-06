@@ -22,9 +22,7 @@ async def register_user(data: UserRequestAdd, db: DBDep):
 
 @router.post("/login")
 async def login_user(data: UserRequestAdd, responce: Response, db: DBDep):
-    user = await db.users.get_user_with_hashed_password(
-        email=data.email
-    )
+    user = await db.users.get_user_with_hashed_password(email=data.email)
     if not user or not AuthService().verify_password(
         data.password, user.hashed_password
     ):
@@ -34,15 +32,13 @@ async def login_user(data: UserRequestAdd, responce: Response, db: DBDep):
     return {"access_token": access_token}
 
 
-@router.get('/only_auth')
-async def only_auth(
-    user_id: UserIdDep,
-    db: DBDep
-):
+@router.get("/only_auth")
+async def only_auth(user_id: UserIdDep, db: DBDep):
     user = await db.users.get_one_or_none(id=user_id)
     return user
 
-@router.post('/logout')
+
+@router.post("/logout")
 async def logout_user(responce: Response):
     responce.delete_cookie("access_token")
     return {"status": "OK"}

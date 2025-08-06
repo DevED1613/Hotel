@@ -34,9 +34,9 @@ async def test_auth(async_client, email, password, status_code):
     assert responce.json().get("email") == email
     assert "id" in user
     assert "password" not in user
-    assert "hashed_password" not in user 
+    assert "hashed_password" not in user
 
     # logout
     responce = await async_client.post("/auth/logout")
     assert responce.status_code == 200
-    assert 'access_token' not in async_client.cookies
+    assert "access_token" not in async_client.cookies

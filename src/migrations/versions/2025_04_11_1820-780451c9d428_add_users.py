@@ -27,5 +27,6 @@ def upgrade() -> None:
         sa.PrimaryKeyConstraint("id"),
     )
 
+
 def downgrade() -> None:
     op.drop_table("users")

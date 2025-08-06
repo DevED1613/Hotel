@@ -1,5 +1,3 @@
-import json
-
 from fastapi_cache.decorator import cache
 from fastapi import APIRouter, Body
 

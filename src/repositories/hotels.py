@@ -23,7 +23,6 @@ class HotelsRepository(BaseRepository):
         limit: int,
         offset: int,
     ) -> list[Hotel]:
-
         rooms_id_to_get = rooms_id_for_booking(date_from=date_from, date_to=date_to)
         hotels_id_to_get = (
             select(RoomsOrm.hotel_id)

@@ -8,6 +8,7 @@ from src.utils.db_manger import DBManager
 from src.tasks.celery_app import celery_instance
 from src.database import async_session_maker_null_poll
 
+
 @celery_instance.task
 def test_task():
     sleep(5)
@@ -17,7 +18,7 @@ def test_task():
 @celery_instance.task
 def resize_image(input_path: str):
     sizes = [1000, 500, 200]
-    output_dir = f"Hotels/src/static/images"
+    output_dir = "Hotels/src/static/images"
     """
     Преобразует изображение в заданные размеры и сохраняет результаты.
     

@@ -1,5 +1,6 @@
 from redis.asyncio import Redis
 
+
 class RedisConnector:
     def __init__(self, host: str, port: int):
         self.host = host
@@ -17,10 +18,10 @@ class RedisConnector:
 
     async def get(self, key: str):
         return await self.redis.get(key)
-    
+
     async def delete(self, key: str):
         await self.redis.delete(key)
 
     async def close(self):
-        if self.redis: 
+        if self.redis:
             await self.redis.close()

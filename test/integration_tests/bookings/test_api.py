@@ -2,8 +2,6 @@ import pytest
 import pytest_asyncio
 
 from test.conftest import get_db_null_poll
-from src.utils.db_manger import DBManager
-from src.database import async_session_maker_null_poll
 
 
 @pytest.mark.parametrize(
@@ -75,7 +73,7 @@ async def test_add_and_get_bookings(
             "date_to": date_to,
         },
     )
-    responce_my_booking = await authenticated_ac.get(f"/bookings/me")
+    responce_my_booking = await authenticated_ac.get("/bookings/me")
     assert responce_add_booking.status_code == 200
     assert responce_my_booking.status_code == 200
     assert me_booking == len(responce_my_booking.json())

@@ -12,7 +12,7 @@ async def test_add_booking_crud(db):
         date_to=date(year=2024, month=1, day=15),
         price=100,
     )
-    
+
     new_booking = await db.bookings.add(booking_data)
     # получить эту бронь и убедиться что она есть
     booking = await db.bookings.get_one_or_none(id=new_booking.id)

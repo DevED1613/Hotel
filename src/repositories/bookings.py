@@ -1,7 +1,7 @@
 from datetime import date
 
 from fastapi import HTTPException
-from sqlalchemy import insert, select
+from sqlalchemy import select
 
 from src.schemas.bookings import BookingAdd
 from src.repositories.mappers.mappers import BookingDataMapper
@@ -28,7 +28,7 @@ class BookingsRepository(BaseRepository):
 
         result = await self.session.execute(rooms_query)
         free_room_ids: list[int] = result.scalars().all()
-        
+
         if data.room_id in free_room_ids:
             new_booking = await self.add(data)
             return new_booking

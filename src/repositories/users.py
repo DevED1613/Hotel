@@ -17,6 +17,3 @@ class UsersRepository(BaseRepository):
         if not model:
             return None
         return UserInDBMapper.map_to_domain_entity(model)
-
-
-    
