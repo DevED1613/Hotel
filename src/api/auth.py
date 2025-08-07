@@ -3,7 +3,7 @@ from fastapi import APIRouter, HTTPException, Response
 
 from src.api.dependencies import UserIdDep, DBDep
 from src.services.auth import AuthService
-from src.schemas.users import UserAdd, UserRequestAdd
+from src.schemas.users import UserAdd, UserInDB, UserRequestAdd
 
 router = APIRouter(prefix="/auth", tags=["Авторизация и Аутентификация"])
 
@@ -22,7 +22,9 @@ async def register_user(data: UserRequestAdd, db: DBDep):
 
 @router.post("/login")
 async def login_user(data: UserRequestAdd, responce: Response, db: DBDep):
-    user = await db.users.get_user_with_hashed_password(email=data.email)
+    user: UserInDB | None = await db.users.get_user_with_hashed_password(
+        email=data.email
+    )
     if not user or not AuthService().verify_password(
         data.password, user.hashed_password
     ):

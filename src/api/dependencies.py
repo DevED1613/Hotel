@@ -9,9 +9,9 @@ from src.database import async_session_maker
 
 
 class Pagination(BaseModel):
-    page: Annotated[int | None, Query(description="Номер страницы", default=1, ge=1)]
+    page: Annotated[int, Query(description="Номер страницы", default=1, ge=1)]
     per_page: Annotated[
-        int | None,
+        int,
         Query(default=5, ge=1, lt=30, description="Количество элементов на странице"),
     ]
 

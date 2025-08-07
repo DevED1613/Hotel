@@ -11,17 +11,17 @@ from src.models.hotels import HotelsOrm
 
 
 class HotelsRepository(BaseRepository):
-    model = HotelsOrm
+    model: type[HotelsOrm] = HotelsOrm
     mapper = HotelDataMapper
 
     async def get_filtered_by_time(
         self,
         date_from: date,
         date_to: date,
-        location: str,
-        title: str,
+        location: str | None,
+        title: str | None,
         limit: int,
-        offset: int,
+        offset: int | None,
     ) -> list[Hotel]:
         rooms_id_to_get = rooms_id_for_booking(date_from=date_from, date_to=date_to)
         hotels_id_to_get = (
@@ -42,4 +42,4 @@ class HotelsRepository(BaseRepository):
 
         return [
             self.mapper.map_to_domain_entity(model) for model in result.scalars().all()
-        ]
+        ]  # type: ignore

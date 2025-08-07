@@ -1,6 +1,7 @@
 # ruff: noqa: E402
 import json
 from pathlib import Path
+from typing import AsyncGenerator
 import pytest
 from unittest import mock
 
@@ -27,7 +28,7 @@ async def get_db_null_poll():
 
 
 @pytest.fixture(scope="function")
-async def db() -> DBManager:  # type: ignore
+async def db() -> AsyncGenerator[DBManager, None]:  # type: ignore
     async for session in get_db_null_poll():
         yield session
 
@@ -36,7 +37,7 @@ app.dependency_overrides[get_db] = get_db_null_poll
 
 
 @pytest_asyncio.fixture(scope="session")
-async def async_client() -> AsyncClient:  # type: ignore
+async def async_client() -> AsyncGenerator[AsyncClient, None]:  # type: ignore
     async with AsyncClient(
         transport=ASGITransport(app=app), base_url="http://test"
     ) as ac:

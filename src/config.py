@@ -33,4 +33,4 @@ class Setting(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int
 
 
-settings = Setting()
+settings = Setting()  # type: ignore

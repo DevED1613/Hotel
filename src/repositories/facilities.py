@@ -1,6 +1,6 @@
-from pydantic import BaseModel
 from sqlalchemy import delete, insert, select
 
+from src.schemas.facilities import RoomFacilityAdd
 from src.repositories.mappers.mappers import (
     FacilitiesDataMapper,
     RoomFacilityDataMapper,
@@ -15,10 +15,12 @@ class FacilitiesRepository(BaseRepository):
 
 
 class RoomsFacilitiesRepository(BaseRepository):
-    model = RoomsFacilitiesOrm
+    model: type[RoomsFacilitiesOrm] = RoomsFacilitiesOrm
     mapper = RoomFacilityDataMapper
 
-    async def update_facilities(self, room_id: int, data: list[BaseModel]) -> None:
+    async def update_facilities(
+        self, room_id: int, data: list[RoomFacilityAdd]
+    ) -> None:
         update_data_stmt = {item.facility_id for item in data}
         tmp = select(self.model.facility_id).filter(self.model.room_id == room_id)
         res = await self.session.execute(tmp)

@@ -1,5 +1,6 @@
 from datetime import date
 
+from pydantic import BaseModel
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
@@ -11,7 +12,7 @@ from src.repositories.base import BaseRepository
 
 
 class RoomsRepository(BaseRepository):
-    model = RoomsOrm
+    model: type[RoomsOrm] = RoomsOrm
     mapper = RoomDataMapper
 
     async def get_filtered_by_time(self, hotel_id: int, date_from: date, date_to: date):
@@ -29,7 +30,7 @@ class RoomsRepository(BaseRepository):
             for model in result.unique().scalars().all()
         ]
 
-    async def get_one_or_none(self, **filter_by):
+    async def get_one_or_none(self, **filter_by) -> BaseModel | None:
         query = (
             select(self.model)
             .options(selectinload(self.model.facilities))
