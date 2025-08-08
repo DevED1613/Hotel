@@ -24,6 +24,8 @@ async def test_add_booking(
     db,
     authenticated_ac,
 ):
+    cookies = authenticated_ac.cookies
+    authenticated_ac.cookies = None
     room_id = (await db.rooms.get_all())[0].id
     responce = await authenticated_ac.post(
         "/bookings",
@@ -40,6 +42,8 @@ async def test_add_booking(
         assert isinstance(res, dict)
         assert res["status"] == "OK"
         assert "data" in res
+
+    authenticated_ac.cookies = cookies
 
 
 @pytest_asyncio.fixture(scope="session")

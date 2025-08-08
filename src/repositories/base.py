@@ -1,4 +1,5 @@
 from typing import Any, Sequence
+from asyncpg import UniqueViolationError
 from pydantic import BaseModel
 from sqlalchemy import select, insert, update, delete
 
@@ -6,7 +7,7 @@ from src.exceptions import ObjectNotFoundException
 from src.database import Base
 from src.repositories.mappers.base import DataMapper
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.exc import NoResultsFound
+from sqlalchemy.exc import NoResultFound, IntegrityError
 
 
 class BaseRepository:
@@ -40,17 +41,21 @@ class BaseRepository:
 
         try:
             model = result.scalar_one()
-        except NoResultsFound:
+        except NoResultFound:
             raise ObjectNotFoundException
         return self.mapper.map_to_domain_entity(model)
 
     async def add(self, data: BaseModel) -> BaseModel:
-        add_data_stmt = (
-            insert(self.model).values(**data.model_dump()).returning(self.model)
-        )
-        result = await self.session.execute(add_data_stmt)
-        model = result.scalars().first()
-        return self.mapper.map_to_domain_entity(model)
+        try:
+            add_data_stmt = insert(self.model).values(**data.model_dump()).returning(self.model)
+            result = await self.session.execute(add_data_stmt)
+            model = result.scalars().one()
+            return self.mapper.map_to_domain_entity(model)
+        except IntegrityError as ex:
+            if isinstance(ex.orig.__cause__, UniqueViolationError):
+                raise ObjectNotFoundException from ex
+            else:
+                raise ex
 
     async def add_bulk(self, data: Sequence[BaseModel]) -> None:
         add_data_stmt = insert(self.model).values([item.model_dump() for item in data])
@@ -66,9 +71,20 @@ class BaseRepository:
             update(self.model)
             .filter_by(**filter_by)
             .values(**data.model_dump(exclude_unset=exclude_unset))
+            .returning(self.model)
         )
-        await self.session.execute(update_data_stmt)
+        res = await self.session.execute(update_data_stmt)
+        try:
+            model = res.scalar_one()
+        except NoResultFound:
+            raise ObjectNotFoundException
+
+
 
     async def delete(self, **filter_by) -> None:
-        delete_start = delete(self.model).filter_by(**filter_by)
-        await self.session.execute(delete_start)
+        delete_start = delete(self.model).filter_by(**filter_by).returning(self.model)
+        result = await self.session.execute(delete_start)
+        try:
+            deleted_row = result.scalar_one()
+        except NoResultFound:
+            raise ObjectNotFoundException

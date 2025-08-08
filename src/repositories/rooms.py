@@ -3,7 +3,10 @@ from datetime import date
 from pydantic import BaseModel
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
+from sqlalchemy.exc import NoResultFound
 
+from src.models.hotels import HotelsOrm
+from src.exceptions import RoomNotFoundException
 from src.repositories.mappers.mappers import RoomDataMapper, RoomWithFacilDataMapper
 from src.repositories.utils import rooms_id_for_booking
 
@@ -16,6 +19,14 @@ class RoomsRepository(BaseRepository):
     mapper = RoomDataMapper
 
     async def get_filtered_by_time(self, hotel_id: int, date_from: date, date_to: date):
+        # проверка на корректность id отеля
+        hotel_check = select(HotelsOrm).filter_by(id=hotel_id)
+        result = await self.session.execute(hotel_check)
+        try:
+            result.scalars().one()
+        except NoResultFound:
+            raise RoomNotFoundException
+
         rooms_id_to_get = rooms_id_for_booking(date_from, date_to, hotel_id)
 
         query = (
@@ -30,7 +41,7 @@ class RoomsRepository(BaseRepository):
             for model in result.unique().scalars().all()
         ]
 
-    async def get_one_or_none(self, **filter_by) -> BaseModel | None:
+    async def get_one_with_facilities(self, **filter_by) -> BaseModel | None:
         query = (
             select(self.model)
             .options(selectinload(self.model.facilities))
@@ -38,7 +49,8 @@ class RoomsRepository(BaseRepository):
         )
 
         result = await self.session.execute(query)
-        model = result.scalars().unique().one_or_none()
-        if model is None:
-            return None
+        try:
+            model = result.scalars().one()
+        except NoResultFound:
+            raise RoomNotFoundException
         return RoomWithFacilDataMapper.map_to_domain_entity(model)

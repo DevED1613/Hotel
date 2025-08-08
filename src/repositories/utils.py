@@ -1,9 +1,13 @@
 from datetime import date
 
 from sqlalchemy import func, select
+from sqlalchemy.exc import NoResultFound
 
+
+from src.exceptions import ObjectNotFoundException
 from src.models.bookings import BookingsOrm
 from src.models.rooms import RoomsOrm
+from src.models.hotels import HotelsOrm
 
 
 def rooms_id_for_booking(
@@ -32,15 +36,18 @@ def rooms_id_for_booking(
     rooms_ids_for_hotel = select(RoomsOrm.id).select_from(RoomsOrm)
     if hotel_id is not None:
         rooms_ids_for_hotel = rooms_ids_for_hotel.filter_by(hotel_id=hotel_id)
-
-    rooms_ids_for_hotel = rooms_ids_for_hotel.subquery(name="rooms_ids_for_hotel")
+    rooms_ids_for_hotel_subquery = rooms_ids_for_hotel.subquery(
+        name="rooms_ids_for_hotel"
+    )
     rooms_id_to_get = (
         select(rooms_left_table.c.room_id)
         .select_from(rooms_left_table)
         .filter(
             rooms_left_table.c.rooms_left > 0,
-            rooms_left_table.c.room_id.in_(select(rooms_ids_for_hotel.c.id)),
+            rooms_left_table.c.room_id.in_(select(rooms_ids_for_hotel_subquery.c.id)),
         )
     )
 
     return rooms_id_to_get
+
+

@@ -1,8 +1,9 @@
 from datetime import date
 
-from fastapi import Query, Body, APIRouter
+from fastapi import HTTPException, Query, Body, APIRouter
 from fastapi_cache.decorator import cache
 
+from src.exceptions import ObjectNotFoundException, check_date_to_after_date_from
 from src.schemas.hotels import HotelAdd, HotelPatch
 from src.api.dependencies import DBDep, PaginationDep
 
@@ -30,6 +31,7 @@ async def get_hotels(
         description="Дата выезда",
     ),
 ):
+    check_date_to_after_date_from(date_from=date_from, date_to=date_to)
     return await db.hotels.get_filtered_by_time(
         date_from=date_from,
         date_to=date_to,
@@ -42,7 +44,10 @@ async def get_hotels(
 
 @router.get("/{hotel_id}", description="Получение отеля по ID")
 async def get_hotel(hotel_id: int, db: DBDep):
-    return await db.hotels.get_one_or_none(id=hotel_id)
+    try:
+        return await db.hotels.get_one(id=hotel_id)
+    except ObjectNotFoundException:
+        raise HTTPException(status_code=404, detail="Отель не найден")
 
 
 @router.post("")
@@ -71,20 +76,35 @@ async def create_hotel(
 
 @router.put("/{hotel_id}")
 async def update_hotel(hotel_id: int, hotel_data: HotelAdd, db: DBDep):
-    await db.hotels.edit(hotel_data, id=hotel_id)
+    try:
+        await db.hotels.edit(hotel_data, id=hotel_id)
+
+    except ObjectNotFoundException:
+        raise HTTPException(status_code=404, detail="Отель не найден")
+
     await db.commit()
     return {"status": "OK"}
 
 
 @router.patch("/{hotel_id}")
 async def update_patch_hotel(hotel_id: int, hotel_data: HotelPatch, db: DBDep):
-    await db.hotels.edit(hotel_data, exclude_unset=True, id=hotel_id)
+    try:
+        await db.hotels.edit(hotel_data, exclude_unset=True, id=hotel_id)
+
+    except ObjectNotFoundException:
+        raise HTTPException(status_code=404, detail="Отель не найден")
+
     await db.commit()
     return {"status": "OK"}
 
 
 @router.delete("/{hotel_id}")
 async def delete_hotel(hotel_id: int, db: DBDep):
-    await db.hotels.delete(id=hotel_id)
+    try:
+        await db.hotels.delete(id=hotel_id)
+
+    except ObjectNotFoundException:
+        raise HTTPException(status_code=404, detail="Отель не найден")
+
     await db.commit()
     return {"status": "OK"}
