@@ -76,16 +76,10 @@ class BaseRepository:
             .values(**data.model_dump(exclude_unset=exclude_unset))
             .returning(self.model)
         )
-        res = await self.session.execute(update_data_stmt)
-        try:
-            res.scalar_one()
-        except NoResultFound:
-            raise ObjectNotFoundException
+        await self.session.execute(update_data_stmt)
+        
 
     async def delete(self, **filter_by) -> None:
         delete_start = delete(self.model).filter_by(**filter_by).returning(self.model)
-        result = await self.session.execute(delete_start)
-        try:
-            result.scalar_one()
-        except NoResultFound:
-            raise ObjectNotFoundException
+        await self.session.execute(delete_start)
+        
