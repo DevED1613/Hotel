@@ -4,9 +4,9 @@ from pathlib import Path
 from typing import AsyncGenerator
 from unittest import mock
 
-import pytest
-
 mock.patch("fastapi_cache.decorator.cache", lambda *args, **kwargs: lambda f: f).start()
+
+import pytest
 
 import pytest_asyncio
 from httpx import ASGITransport, AsyncClient
@@ -21,6 +21,11 @@ from src.schemas.rooms import RoomAdd
 from src.utils.db_manger import DBManager
 
 BASE_DIR = Path(__file__).resolve().parent
+
+
+@pytest.fixture(scope="session", autouse=True)
+async def check_test_mode():
+    assert settings.MODE == "TEST"
 
 
 async def get_db_null_poll():
@@ -43,11 +48,6 @@ async def async_client() -> AsyncGenerator[AsyncClient, None]:  # type: ignore
         transport=ASGITransport(app=app), base_url="http://test"
     ) as ac:
         yield ac
-
-
-@pytest.fixture(scope="session", autouse=True)
-async def check_test_mode():
-    assert settings.MODE == "TEST"
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -81,7 +81,7 @@ async def add_hotels_and_rooms_in_DB(setup_database):
         await db_.commit()
 
 
-@pytest.fixture(scope="session", autouse=True)
+@pytest.fixture(scope="session")
 async def authenticated_ac(register_user, async_client):
     await async_client.post(
         "auth/login", json={"email": "huyamba@123.com", "password": "1613"}
