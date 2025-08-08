@@ -1,13 +1,14 @@
 from typing import Any, Sequence
+
 from asyncpg import UniqueViolationError
 from pydantic import BaseModel
-from sqlalchemy import select, insert, update, delete
-
-from src.exceptions import ObjectNotFoundException
-from src.database import Base
-from src.repositories.mappers.base import DataMapper
+from sqlalchemy import delete, insert, select, update
+from sqlalchemy.exc import IntegrityError, NoResultFound
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.exc import NoResultFound, IntegrityError
+
+from src.database import Base
+from src.exceptions import ObjectNotFoundException
+from src.repositories.mappers.base import DataMapper
 
 
 class BaseRepository:
@@ -47,7 +48,9 @@ class BaseRepository:
 
     async def add(self, data: BaseModel) -> BaseModel:
         try:
-            add_data_stmt = insert(self.model).values(**data.model_dump()).returning(self.model)
+            add_data_stmt = (
+                insert(self.model).values(**data.model_dump()).returning(self.model)
+            )
             result = await self.session.execute(add_data_stmt)
             model = result.scalars().one()
             return self.mapper.map_to_domain_entity(model)
@@ -75,16 +78,14 @@ class BaseRepository:
         )
         res = await self.session.execute(update_data_stmt)
         try:
-            model = res.scalar_one()
+            res.scalar_one()
         except NoResultFound:
             raise ObjectNotFoundException
-
-
 
     async def delete(self, **filter_by) -> None:
         delete_start = delete(self.model).filter_by(**filter_by).returning(self.model)
         result = await self.session.execute(delete_start)
         try:
-            deleted_row = result.scalar_one()
+            result.scalar_one()
         except NoResultFound:
             raise ObjectNotFoundException

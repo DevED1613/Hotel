@@ -1,12 +1,11 @@
 from datetime import date
 
-from fastapi import HTTPException, Query, Body, APIRouter
+from fastapi import APIRouter, Body, HTTPException, Query
 from fastapi_cache.decorator import cache
 
+from src.api.dependencies import DBDep, PaginationDep
 from src.exceptions import ObjectNotFoundException, check_date_to_after_date_from
 from src.schemas.hotels import HotelAdd, HotelPatch
-from src.api.dependencies import DBDep, PaginationDep
-
 
 router = APIRouter(prefix="/hotels", tags=["Отели"])
 

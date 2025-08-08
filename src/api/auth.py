@@ -1,10 +1,9 @@
 from fastapi import APIRouter, HTTPException, Response
 
-
+from src.api.dependencies import DBDep, UserIdDep
 from src.exceptions import ObjectNotFoundException
-from src.api.dependencies import UserIdDep, DBDep
-from src.services.auth import AuthService
 from src.schemas.users import UserAdd, UserInDB, UserRequestAdd
+from src.services.auth import AuthService
 
 router = APIRouter(prefix="/auth", tags=["Авторизация и Аутентификация"])
 
@@ -18,7 +17,7 @@ async def register_user(data: UserRequestAdd, db: DBDep):
         await db.commit()
     except ObjectNotFoundException:
         raise HTTPException(status_code=409, detail="Пользователь уже зарегистрирован")
-    
+
     return {"status": "OK"}
 
 

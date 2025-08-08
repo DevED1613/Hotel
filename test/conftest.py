@@ -2,22 +2,23 @@
 import json
 from pathlib import Path
 from typing import AsyncGenerator
-import pytest
 from unittest import mock
+
+import pytest
 
 mock.patch("fastapi_cache.decorator.cache", lambda *args, **kwargs: lambda f: f).start()
 
-from httpx import AsyncClient, ASGITransport
 import pytest_asyncio
+from httpx import ASGITransport, AsyncClient
 
 from src.api.dependencies import get_db
+from src.config import settings
+from src.database import Base, async_session_maker_null_poll, engine_null_pool
+from src.main import app
+from src.models import *  # noqa F403
 from src.schemas.hotels import HotelAdd
 from src.schemas.rooms import RoomAdd
 from src.utils.db_manger import DBManager
-from src.config import settings
-from src.database import Base, engine_null_pool, async_session_maker_null_poll
-from src.models import *  # noqa F403
-from src.main import app
 
 BASE_DIR = Path(__file__).resolve().parent
 

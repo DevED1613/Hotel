@@ -2,16 +2,15 @@ from datetime import date
 
 from pydantic import BaseModel
 from sqlalchemy import select
-from sqlalchemy.orm import selectinload
 from sqlalchemy.exc import NoResultFound
+from sqlalchemy.orm import selectinload
 
-from src.models.hotels import HotelsOrm
 from src.exceptions import RoomNotFoundException
-from src.repositories.mappers.mappers import RoomDataMapper, RoomWithFacilDataMapper
-from src.repositories.utils import rooms_id_for_booking
-
+from src.models.hotels import HotelsOrm
 from src.models.rooms import RoomsOrm
 from src.repositories.base import BaseRepository
+from src.repositories.mappers.mappers import RoomDataMapper, RoomWithFacilDataMapper
+from src.repositories.utils import rooms_id_for_booking
 
 
 class RoomsRepository(BaseRepository):

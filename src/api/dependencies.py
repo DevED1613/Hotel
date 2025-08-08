@@ -1,11 +1,11 @@
 from typing import Annotated
 
-from pydantic import BaseModel
 from fastapi import Depends, HTTPException, Query, Request
+from pydantic import BaseModel
 
-from src.utils.db_manger import DBManager
-from src.services.auth import AuthService
 from src.database import async_session_maker
+from src.services.auth import AuthService
+from src.utils.db_manger import DBManager
 
 
 class Pagination(BaseModel):
@@ -40,5 +40,3 @@ async def get_db():
 
 
 DBDep = Annotated[DBManager, Depends(get_db)]
-
-

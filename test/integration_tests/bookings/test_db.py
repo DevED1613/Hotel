@@ -1,4 +1,5 @@
 from datetime import date
+
 from src.schemas.bookings import BookingAdd
 
 

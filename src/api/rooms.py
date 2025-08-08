@@ -1,14 +1,15 @@
 from datetime import date
-from fastapi import APIRouter, Body, HTTPException
 
+from fastapi import APIRouter, Body
+
+from src.api.dependencies import DBDep
 from src.exceptions import (
     RoomNotFoundException,
     RoomNotFoundHTTPException,
     check_date_to_after_date_from,
 )
 from src.schemas.facilities import RoomFacilityAdd
-from src.api.dependencies import DBDep
-from src.schemas.rooms import Room, RoomAdd, RoomAddRequest, RoomPatchRequest, RoomPatch
+from src.schemas.rooms import Room, RoomAdd, RoomAddRequest, RoomPatch, RoomPatchRequest
 
 router = APIRouter(prefix="/hotels", tags=["Номера"])
 

@@ -1,13 +1,9 @@
 from datetime import date
 
 from sqlalchemy import func, select
-from sqlalchemy.exc import NoResultFound
 
-
-from src.exceptions import ObjectNotFoundException
 from src.models.bookings import BookingsOrm
 from src.models.rooms import RoomsOrm
-from src.models.hotels import HotelsOrm
 
 
 def rooms_id_for_booking(
@@ -49,5 +45,3 @@ def rooms_id_for_booking(
     )
 
     return rooms_id_to_get
-
-

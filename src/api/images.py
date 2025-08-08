@@ -1,4 +1,5 @@
 import shutil
+
 from fastapi import APIRouter, UploadFile
 
 from src.tasks.task import resize_image
