@@ -1,18 +1,17 @@
-import shutil
+from fastapi import APIRouter, HTTPException, UploadFile
 
-from fastapi import APIRouter, UploadFile
-
-from src.tasks.task import resize_image
+from src.services.images import ImageService
 
 router = APIRouter(prefix="/images", tags=["Изображения"])
 
 
 @router.post("")
 async def upload_image(image: UploadFile):
-    image_path = f"Hotels/src/static/images/{image.filename}"
-    with open(image_path, "wb+") as f:
-        shutil.copyfileobj(image.file, f)
-
-    resize_image.delay(image_path)
+    try:
+        await ImageService().upload_image(image)
+    except FileNotFoundError:
+        raise HTTPException(status_code=500, detail="Произошла ошибка")
+    except Exception:
+        raise HTTPException(status_code=500, detail="Произошла ошибка")
 
     return {"status": "OK"}

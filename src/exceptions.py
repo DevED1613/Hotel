@@ -1,5 +1,3 @@
-from datetime import date
-
 from fastapi import HTTPException
 
 
@@ -14,11 +12,11 @@ class ObjectNotFoundException(BookingServiceException):
     detail = "Объект не найден"
 
 
-class HotelNotFoundException(BookingServiceException):
+class HotelNotFoundException(ObjectNotFoundException):
     detail = "Отель не найден"
 
 
-class RoomNotFoundException(BookingServiceException):
+class RoomNotFoundException(ObjectNotFoundException):
     detail = "Номер не найден"
 
 
@@ -35,11 +33,13 @@ class DateIncorrectException(BookingServiceException):
 
 
 class BookingServiceHTTPException(HTTPException):
-    status_code = 400
+    status_code = 500
     detail = "Неопределенная ошибка"
 
-    def __init__(self, status_code=status_code, detail=detail):
-        super().__init__(status_code=status_code, detail=detail)
+    def __init__(
+        self,
+    ):
+        super().__init__(status_code=self.status_code, detail=self.detail)
 
 
 class HotelNotFoundHTTPException(BookingServiceHTTPException):
@@ -50,10 +50,3 @@ class HotelNotFoundHTTPException(BookingServiceHTTPException):
 class RoomNotFoundHTTPException(BookingServiceHTTPException):
     status_code = 404
     detail = "Номер не найден"
-
-
-def check_date_to_after_date_from(date_from: date, date_to: date) -> None:
-    if date_to <= date_from:
-        raise HTTPException(
-            status_code=422, detail="Дата заезда не может быть позже даты выезда"
-        )

@@ -42,8 +42,8 @@ class BaseRepository:
 
         try:
             model = result.scalar_one()
-        except NoResultFound:
-            raise ObjectNotFoundException
+        except NoResultFound as ex:
+            raise ObjectNotFoundException from ex
         return self.mapper.map_to_domain_entity(model)
 
     async def add(self, data: BaseModel) -> BaseModel:
@@ -74,12 +74,9 @@ class BaseRepository:
             update(self.model)
             .filter_by(**filter_by)
             .values(**data.model_dump(exclude_unset=exclude_unset))
-            .returning(self.model)
         )
         await self.session.execute(update_data_stmt)
-        
 
     async def delete(self, **filter_by) -> None:
-        delete_start = delete(self.model).filter_by(**filter_by).returning(self.model)
+        delete_start = delete(self.model).filter_by(**filter_by)
         await self.session.execute(delete_start)
-        

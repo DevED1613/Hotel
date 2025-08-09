@@ -1,3 +1,4 @@
+# ruff: noqa: E402
 import logging
 import sys
 from contextlib import asynccontextmanager
@@ -19,6 +20,7 @@ from src.api.images import router as router_images
 from src.api.rooms import router as router_rooms
 from src.database import *  # noqa
 from src.init import redis_manager
+
 
 
 @asynccontextmanager
