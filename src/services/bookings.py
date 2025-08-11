@@ -20,12 +20,9 @@ class BookingService(BaseService):
             user_id=user_id, price=price_room, **booking_data.model_dump()
         )
 
-        try:
-            booking = await self.db.bookings.add_booking(
-                _booking_data, hotel_id=room.hotel_id
-            )
-        except NoAvailableRoomsException as ex:
-            raise NoAvailableRoomsException from ex
+        booking = await self.db.bookings.add_booking(
+            _booking_data, hotel_id=room.hotel_id
+        )
 
         await self.db.commit()
 
