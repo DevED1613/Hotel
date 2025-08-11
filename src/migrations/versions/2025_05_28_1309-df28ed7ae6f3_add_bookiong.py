@@ -1,9 +1,8 @@
-"""add bookiong
+"""Fix booking table name
 
 Revision ID: df28ed7ae6f3
 Revises: cb212c261a5e
 Create Date: 2025-05-28 13:09:55.145830
-
 """
 
 from typing import Sequence, Union
@@ -20,7 +19,7 @@ depends_on: Union[str, Sequence[str], None] = None
 def upgrade() -> None:
     """Upgrade schema."""
     op.create_table(
-        "booking",
+        "bookings",
         sa.Column("id", sa.Integer(), nullable=False),
         sa.Column("user_id", sa.Integer(), nullable=False),
         sa.Column("room_id", sa.Integer(), nullable=False),
@@ -41,4 +40,4 @@ def upgrade() -> None:
 
 def downgrade() -> None:
     """Downgrade schema."""
-    op.drop_table("booking")
+    op.drop_table("bookings")
