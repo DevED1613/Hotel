@@ -1,4 +1,5 @@
 from datetime import date
+
 import pytest
 import pytest_asyncio
 from httpx import AsyncClient
@@ -43,7 +44,6 @@ async def test_add_booking(
         assert isinstance(res, dict)
         assert res["status"] == "OK"
         assert "data" in res
-
 
 
 @pytest_asyncio.fixture(scope="module")

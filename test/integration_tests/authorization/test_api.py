@@ -10,7 +10,12 @@ from httpx import AsyncClient
         ("huyamba@123.com", "", 409),
     ],
 )
-async def test_auth(email: str, password: str, status_code: int, async_client: AsyncClient,):
+async def test_auth(
+    email: str,
+    password: str,
+    status_code: int,
+    async_client: AsyncClient,
+):
     # register
     response = await async_client.post(
         "/auth/register", json={"email": email, "password": password}
