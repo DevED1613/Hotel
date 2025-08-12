@@ -24,4 +24,4 @@ def upgrade() -> None:
 
 def downgrade() -> None:
     """Downgrade schema."""
-    op.drop_constraint(None, "users", type_="unique")  # type: ignore
+    op.drop_constraint("users_email_key", "users", type_="unique")  # type: ignore

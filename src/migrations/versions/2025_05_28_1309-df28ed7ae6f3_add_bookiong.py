@@ -39,5 +39,6 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
-    """Downgrade schema."""
-    op.drop_table("bookings")
+    inspector = sa.inspect(op.get_bind())
+    if "bookings" in inspector.get_table_names():
+        op.drop_table("bookings")
