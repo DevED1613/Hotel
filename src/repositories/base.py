@@ -77,6 +77,8 @@ class BaseRepository:
         )
         await self.session.execute(update_data_stmt)
 
-    async def delete(self, **filter_by) -> None:
-        delete_start = delete(self.model).filter_by(**filter_by)
-        await self.session.execute(delete_start)
+    async def delete(self, **filter_by: Any) -> None:
+        delete_stmt = delete(self.model).filter_by(**filter_by).returning(self.model.id)
+        result = await self.session.execute(delete_stmt)
+        if not result.scalars().first():
+            raise ObjectNotFoundException(f"Объект с фильтром {filter_by} не найден")

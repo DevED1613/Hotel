@@ -32,6 +32,14 @@ class DateIncorrectException(BookingServiceException):
     detail = "Дата заезда больше даты выезда"
 
 
+class EmptyValueException(BookingServiceException):
+    detail = "Поле не может быть пустым"
+
+
+class AlreadyExistsError(BookingServiceException):
+    detail = "Объект уже существует"
+
+
 class BookingServiceHTTPException(HTTPException):
     status_code = 500
     detail = "Неопределенная ошибка"
@@ -42,6 +50,11 @@ class BookingServiceHTTPException(HTTPException):
         super().__init__(status_code=self.status_code, detail=self.detail)
 
 
+class EmptyValueExceptionHTTPException(BookingServiceHTTPException):
+    status_code = 400
+    detail = "Поле не может быть пустым"
+
+
 class HotelNotFoundHTTPException(BookingServiceHTTPException):
     status_code = 404
     detail = "Отель не найден"
@@ -50,3 +63,10 @@ class HotelNotFoundHTTPException(BookingServiceHTTPException):
 class RoomNotFoundHTTPException(BookingServiceHTTPException):
     status_code = 404
     detail = "Номер не найден"
+
+
+def check_values(*args):
+    for arg in args:
+        if arg is None or (isinstance(arg, str) and not arg.strip()):
+            return False
+    return True
