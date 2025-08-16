@@ -14,6 +14,10 @@ class BookingService(BaseService):
         room = await DataCheckService.check_room_exists(
             room_id=booking_data.room_id, db=self.db
         )
+        DataCheckService.check_date_to_after_date_from(
+            date_from=booking_data.date_from, date_to=booking_data.date_to
+        )
+
 
         price_room: int = room.price  # type: ignore
         _booking_data = BookingAdd(

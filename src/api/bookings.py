@@ -4,6 +4,7 @@ from fastapi import APIRouter, HTTPException
 
 from src.api.dependencies import DBDep, UserIdDep
 from src.exceptions import (
+    DateIncorrectException,
     NoAvailableRoomsException,
     RoomNotFoundException,
     RoomNotFoundHTTPException,
@@ -31,12 +32,12 @@ async def create_booking(
     booking_data: BookingAddRequst,
 ):
     try:
-        logging.info(f"Booking data: {booking_data}")
-        logging.info(f"User id: {user_id}")
         booking = await BookingService(db).add_booking(booking_data, user_id=user_id)
     except NoAvailableRoomsException as ex:
         raise HTTPException(status_code=409, detail=ex.detail)
     except RoomNotFoundException:
         raise RoomNotFoundHTTPException
+    except DateIncorrectException:
+        raise HTTPException(status_code=400, detail="Дата заезда не может быть больше даты выезда")
 
     return {"status": "OK", "data": booking}
