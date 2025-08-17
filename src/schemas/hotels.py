@@ -1,7 +1,9 @@
 from pydantic import BaseModel, Field
 
+from src.schemas.base import BaseSchema
 
-class HotelAdd(BaseModel):
+
+class HotelAdd(BaseSchema):
     title: str
     location: str
 

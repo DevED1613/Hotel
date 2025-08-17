@@ -1,7 +1,9 @@
 from pydantic import BaseModel, ConfigDict, EmailStr
 
+from src.schemas.base import BaseSchema
 
-class UserRequestAdd(BaseModel):
+
+class UserRequestAdd(BaseSchema):
     email: EmailStr
     password: str
 

@@ -1,7 +1,9 @@
 from pydantic import BaseModel, ConfigDict
 
+from src.schemas.base import BaseSchema
 
-class FacilityAdd(BaseModel):
+
+class FacilityAdd(BaseSchema):
     title: str
 
 

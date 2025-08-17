@@ -1,22 +1,33 @@
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
+from src.schemas.base import BaseSchema
 from src.schemas.facilities import Facility
 
 
-class RoomAdd(BaseModel):
+class RoomAdd(BaseSchema):
     hotel_id: int
     title: str
     description: str | None = Field(None)
     price: int
     quantity: int
 
+    @field_validator("description")
+    @classmethod
+    def skip_empty(cls, value: str | None) -> str | None:
+        return value
 
-class RoomAddRequest(BaseModel):
+
+class RoomAddRequest(BaseSchema):
     title: str
     description: str | None = None
     price: int
     quantity: int
-    facilities_ids: list[int] | None = None
+    facilities_ids: list[int] | None = Field(None)
+
+    @field_validator("description")
+    @classmethod
+    def skip_empty(cls, value: str | None) -> str | None:
+        return value
 
 
 class Room(RoomAdd):
