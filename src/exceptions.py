@@ -1,4 +1,5 @@
-from fastapi import HTTPException
+from fastapi import HTTPException, Request
+from fastapi.exceptions import RequestValidationError
 
 
 class BookingServiceException(Exception):
@@ -10,6 +11,9 @@ class BookingServiceException(Exception):
 
 class ObjectNotFoundException(BookingServiceException):
     detail = "Объект не найден"
+
+class ObjectAlreadyExistsException(BookingServiceException):
+    detail = "Объект уже существует"
 
 
 class HotelNotFoundException(ObjectNotFoundException):
@@ -39,6 +43,9 @@ class EmptyValueException(BookingServiceException):
 class AlreadyExistsError(BookingServiceException):
     detail = "Объект уже существует"
 
+class NoFieldsToUpdateException(BookingServiceException):
+    detail = "Нет полей для обновления"
+
 
 class BookingServiceHTTPException(HTTPException):
     status_code = 500
@@ -51,8 +58,8 @@ class BookingServiceHTTPException(HTTPException):
 
 
 class EmptyValueExceptionHTTPException(BookingServiceHTTPException):
-    status_code = 400
-    detail = "Поле не может быть пустым"
+    status_code = 422
+    detail = "Поле не может быть пустым или состоять только из пробелов"
 
 
 class HotelNotFoundHTTPException(BookingServiceHTTPException):
@@ -64,9 +71,13 @@ class RoomNotFoundHTTPException(BookingServiceHTTPException):
     status_code = 404
     detail = "Номер не найден"
 
+class NoFieldsToUpdateHTTPException(BookingServiceHTTPException):
+    status_code = 400
+    detail = "Нет полей для обновления"
 
-def check_values(*args):
-    for arg in args:
-        if arg is None or (isinstance(arg, str) and not arg.strip()):
-            return False
-    return True
+
+async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    errors = exc.errors()
+    if any("Поле не может быть пустым" in (err.get("msg") or "") for err in errors):
+        raise EmptyValueExceptionHTTPException()
+    raise exc
