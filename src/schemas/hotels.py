@@ -15,3 +15,7 @@ class Hotel(HotelAdd):
 class HotelPatch(BaseModel):
     title: str | None = Field(None)
     location: str | None = Field(None)
+
+    class Config:
+        from_attributes = True
+        

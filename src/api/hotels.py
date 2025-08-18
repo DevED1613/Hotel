@@ -1,10 +1,11 @@
 from datetime import date
+import logging
 
-from fastapi import APIRouter, Body, Query
+from fastapi import APIRouter, Body, HTTPException, Query
 from fastapi_cache.decorator import cache
 
 from src.api.dependencies import DBDep, PaginationDep
-from src.exceptions import HotelNotFoundHTTPException, ObjectNotFoundException
+from src.exceptions import DateIncorrectException, EmptyValueException, EmptyValueExceptionHTTPException, HotelNotFoundException, HotelNotFoundHTTPException, NoFieldsToUpdateException, NoFieldsToUpdateHTTPException, ObjectAlreadyExistsException, ObjectNotFoundException
 from src.schemas.hotels import HotelAdd, HotelPatch
 from src.services.hotels import HotelService
 
@@ -30,14 +31,21 @@ async def get_hotels(
         ],
         description="Дата выезда",
     ),
-):
-    HotelService(db).get_filtered_by_time(
-        pagintation=pagintation,
-        date_from=date_from,
-        date_to=date_to,
-        location=location,
-        title=title,
-    )
+):  
+    try:
+        hotels = await HotelService(db).get_filtered_by_time(
+            pagintation=pagintation,
+            date_from=date_from,
+            date_to=date_to,
+            location=location,
+            title=title,
+        )
+    except DateIncorrectException:
+        raise HTTPException(status_code=400, detail="Дата заезда не может быть больше даты выезда")
+    if hotels:
+        return hotels
+    else:
+        return 'Свободных отелей не найдено'
 
 
 @router.get("/{hotel_id}", description="Получение отеля по ID")
@@ -67,27 +75,35 @@ async def create_hotel(
         }
     ),
 ):
-    hotel = await HotelService(db).add_hotel(hotel_data)
-    return {"status": "OK", "data": hotel}
+    try:
+        new_hotel = await HotelService(db).add_hotel(hotel_data)
+    except HotelNotFoundException:
+        raise HotelNotFoundHTTPException
+    except ObjectAlreadyExistsException:
+        raise HTTPException(status_code=409, detail="Отель с такими данными уже существует")
+    return {"status": "OK", "data": new_hotel}
 
 
 @router.put("/{hotel_id}")
 async def update_hotel(hotel_id: int, hotel_data: HotelAdd, db: DBDep):
     try:
-        await HotelService(db).edit_hotel(hotel_data, hotel_id=hotel_id)
+        hotel_updated = await HotelService(db).edit_hotel(hotel_data, hotel_id=hotel_id)
     except ObjectNotFoundException:
         raise HotelNotFoundHTTPException
-    return {"status": "OK"}
+    return {"status": "OK", "data": hotel_updated}
 
 
 @router.patch("/{hotel_id}")
 async def update_patch_hotel(hotel_id: int, hotel_data: HotelPatch, db: DBDep):
     try:
-        await HotelService(db).edit_hotel(
+        await HotelService(db).patch_hotel(
             hotel_data, hotel_id=hotel_id, exclude_unset=True
         )
     except ObjectNotFoundException:
         raise HotelNotFoundHTTPException
+    except NoFieldsToUpdateException:
+        raise NoFieldsToUpdateHTTPException
+
     return {"status": "OK"}
 
 
