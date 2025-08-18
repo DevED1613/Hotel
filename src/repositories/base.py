@@ -7,7 +7,11 @@ from sqlalchemy.exc import IntegrityError, NoResultFound
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.database import Base
-from src.exceptions import ObjectNotFoundException
+from src.exceptions import (
+    EmptyValueException,
+    NoFieldsToUpdateException,
+    ObjectNotFoundException,
+)
 from src.repositories.mappers.base import DataMapper
 
 
@@ -68,14 +72,31 @@ class BaseRepository:
         self,
         data: BaseModel,
         exclude_unset: bool = False,
+        exclude_none: bool = False,
         **filter_by,  # type: ignore
     ) -> None:
+
         update_data_stmt = (
             update(self.model)
             .filter_by(**filter_by)
             .values(**data.model_dump(exclude_unset=exclude_unset))
+            .returning(self.model)
         )
-        await self.session.execute(update_data_stmt)
+        result_update = await self.session.execute(update_data_stmt)
+        updated_model = result_update.scalars().one_or_none()
+        if not updated_model:
+            raise ObjectNotFoundException(f"Объект с фильтром {filter_by} не найден")
+        return self.mapper.map_to_domain_entity(updated_model)
+
+    async def patch(
+        self,
+        data: BaseModel,
+        exclude_unset: bool = True,
+        **filter_by: Any,
+    ) -> None:
+        if not data.model_dump(exclude_unset=True):
+            raise NoFieldsToUpdateException
+        return await self.edit(data, exclude_unset,**filter_by)
 
     async def delete(self, **filter_by: Any) -> None:
         delete_stmt = delete(self.model).filter_by(**filter_by).returning(self.model.id)
