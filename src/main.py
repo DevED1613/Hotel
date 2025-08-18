@@ -8,6 +8,7 @@ import uvicorn
 from fastapi import FastAPI
 from fastapi_cache import FastAPICache
 from fastapi_cache.backends.redis import RedisBackend
+from fastapi.exceptions import RequestValidationError
 
 sys.path.append(str(Path(__file__).parent.parent))
 logging.basicConfig(level=logging.INFO)
@@ -19,6 +20,7 @@ from src.api.hotels import router as router_hotels
 from src.api.images import router as router_images
 from src.api.rooms import router as router_rooms
 from src.database import *  # noqa
+from src.exceptions import validation_exception_handler
 from src.init import redis_manager
 
 
@@ -33,6 +35,12 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(lifespan=lifespan)
+
+
+app.add_exception_handler(
+    RequestValidationError,
+    validation_exception_handler)
+
 
 app.include_router(router_auth)
 app.include_router(router_hotels)
