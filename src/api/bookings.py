@@ -1,5 +1,3 @@
-import logging
-
 from fastapi import APIRouter, HTTPException
 
 from src.api.dependencies import DBDep, UserIdDep
@@ -38,6 +36,8 @@ async def create_booking(
     except RoomNotFoundException:
         raise RoomNotFoundHTTPException
     except DateIncorrectException:
-        raise HTTPException(status_code=400, detail="Дата заезда не может быть больше даты выезда")
+        raise HTTPException(
+            status_code=400, detail="Дата заезда не может быть больше даты выезда"
+        )
 
     return {"status": "OK", "data": booking}
