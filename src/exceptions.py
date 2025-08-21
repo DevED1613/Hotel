@@ -1,5 +1,7 @@
 from fastapi import HTTPException, Request
 from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse
+from pydantic import ValidationError
 
 
 class BookingServiceException(Exception):
@@ -12,6 +14,7 @@ class BookingServiceException(Exception):
 class ObjectNotFoundException(BookingServiceException):
     detail = "Объект не найден"
 
+
 class ObjectAlreadyExistsException(BookingServiceException):
     detail = "Объект уже существует"
 
@@ -22,6 +25,10 @@ class HotelNotFoundException(ObjectNotFoundException):
 
 class RoomNotFoundException(ObjectNotFoundException):
     detail = "Номер не найден"
+
+
+class FacilityNotFoundException(ObjectNotFoundException):
+    detail = "Удобства в списке не найдены"
 
 
 class NoAvailableRoomsException(BookingServiceException):
@@ -42,6 +49,7 @@ class EmptyValueException(BookingServiceException):
 
 class AlreadyExistsError(BookingServiceException):
     detail = "Объект уже существует"
+
 
 class NoFieldsToUpdateException(BookingServiceException):
     detail = "Нет полей для обновления"
@@ -71,13 +79,69 @@ class RoomNotFoundHTTPException(BookingServiceHTTPException):
     status_code = 404
     detail = "Номер не найден"
 
+
+class FacilityNotFoundHTTPException(BookingServiceHTTPException):
+    status_code = 404
+    detail = "Удобства в списке не найдены"
+
+
 class NoFieldsToUpdateHTTPException(BookingServiceHTTPException):
     status_code = 400
     detail = "Нет полей для обновления"
 
 
+class DateIncorrectHTTPException(BookingServiceHTTPException):
+    status_code = 400
+    detail = "Дата заезда не может быть больше даты выезда"
+
+
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
-    errors = exc.errors()
-    if any("Поле не может быть пустым" in (err.get("msg") or "") for err in errors):
-        raise EmptyValueExceptionHTTPException()
-    raise exc
+    formatted_errors = []
+
+    for err in exc.errors():
+        field = ".".join(str(loc) for loc in err.get("loc", []) if loc not in ("body",))
+        msg = err.get("msg")
+        err_type = err.get("type")
+
+        if err_type == "missing":
+            msg = "Обязательное поле отсутствует"
+        elif err_type == "string_type":
+            msg = "Поле должно быть строкой"
+        elif err_type == "greater_than":
+            msg = f"Поле '{field}' должно быть больше 0"
+        elif err_type == "string_pattern_mismatch":
+            msg = "Поле не может быть пустым или состоять только из пробелов"
+
+        formatted_errors.append({"field": field, "message": msg})
+
+    return JSONResponse(
+        status_code=422,
+        content={"status": "error", "errors": formatted_errors},
+    )
+
+
+async def validation_exception_handler(
+    request: Request, exc: ValidationError | RequestValidationError
+):  # noqa F811
+    formatted_errors = []
+
+    for err in exc.errors():
+        field = ".".join(str(loc) for loc in err.get("loc", []) if loc not in ("body",))
+        msg = err.get("msg")
+        err_type = err.get("type")
+
+        if err_type == "missing":
+            msg = "Обязательное поле отсутствует"
+        elif err_type == "string_type":
+            msg = "Поле должно быть строкой"
+        elif err_type == "greater_than":
+            msg = f"Поле '{field}' должно быть больше 0"
+        elif "Поле не может быть пустым" in msg:
+            msg = "Поле не может быть пустым или состоять только из пробелов"
+
+        formatted_errors.append({"field": field, "message": msg})
+
+    return JSONResponse(
+        status_code=422,
+        content={"status": "error", "errors": formatted_errors},
+    )
