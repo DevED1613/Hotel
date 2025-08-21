@@ -24,7 +24,7 @@ def resize_image(input_path: str) -> None:
     """
 
     sizes = [1000, 500, 200]
-    output_dir = "Hotels/src/static/images"
+    output_dir = os.path.dirname(input_path)
     logging.info(f"Обработка изображения: {input_path}")
 
     try:

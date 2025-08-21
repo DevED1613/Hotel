@@ -9,6 +9,8 @@ services:
       - MyNetwork
     env_file:
       - .env
+    volumes:
+      - ./src/static/images:/app/src/static/images 
     
   bookings_celery_worker:
     container_name: book_celery_worker
@@ -19,6 +21,8 @@ services:
       - MyNetwork
     env_file:
       - .env
+    volumes:
+      - ./src/static/images:/app/src/static/images 
     
 
   booking_celery_beat:
@@ -30,6 +34,8 @@ services:
       - MyNetwork
     env_file:
       - .env
+    volumes:
+      - ./src/static/images:/app/src/static/images 
     
 
 networks:

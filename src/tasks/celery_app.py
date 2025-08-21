@@ -8,6 +8,6 @@ celery_instance = Celery("tasks", broker=settings.REDIS_URL, include=["src.tasks
 celery_instance.conf.beat_schedule = {
     "send_email_to_users_with_today_checkin": {
         "task": "booking_today_checkin",
-        "schedule": 5,
+        "schedule": 60,
     }
 }

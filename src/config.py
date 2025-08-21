@@ -33,5 +33,7 @@ class Setting(BaseSettings):
     JWT_ALGORITHM: str
     ACCESS_TOKEN_EXPIRE_MINUTES: int
 
+    STATIC_DIR: str
+
 
 settings = Setting()  # type: ignore
