@@ -8,8 +8,8 @@ class RoomAdd(BaseSchema):
     hotel_id: int
     title: str
     description: str | None = Field(None)
-    price: int
-    quantity: int
+    price: int = Field(..., gt=0)
+    quantity: int = Field(..., gt=0)
 
     @field_validator("description")
     @classmethod
@@ -43,8 +43,8 @@ class RoomPatch(BaseModel):
     hotel_id: int | None = None
     title: str | None = None
     description: str | None = None
-    price: int | None = None
-    quantity: int | None = None
+    price: int | None = Field(None, gt=0)
+    quantity: int | None = Field(None, gt=0)
 
 
 class RoomPatchRequest(BaseModel):

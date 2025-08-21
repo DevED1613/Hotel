@@ -5,7 +5,7 @@ from sqlalchemy import select
 from sqlalchemy.exc import NoResultFound
 from sqlalchemy.orm import selectinload
 
-from src.exceptions import RoomNotFoundException
+from src.exceptions import HotelNotFoundException, RoomNotFoundException
 from src.models.hotels import HotelsOrm
 from src.models.rooms import RoomsOrm
 from src.repositories.base import BaseRepository
@@ -24,7 +24,7 @@ class RoomsRepository(BaseRepository):
         try:
             result.scalars().one()
         except NoResultFound:
-            raise RoomNotFoundException
+            raise HotelNotFoundException
 
         rooms_id_to_get = rooms_id_for_booking(date_from, date_to, hotel_id)
 
