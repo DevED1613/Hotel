@@ -9,6 +9,7 @@ from fastapi import FastAPI
 from fastapi_cache import FastAPICache
 from fastapi_cache.backends.redis import RedisBackend
 from fastapi.exceptions import RequestValidationError
+from pydantic import ValidationError
 
 sys.path.append(str(Path(__file__).parent.parent))
 logging.basicConfig(level=logging.INFO)
@@ -24,7 +25,6 @@ from src.exceptions import validation_exception_handler
 from src.init import redis_manager
 
 
-
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     await redis_manager.connect()
@@ -37,9 +37,9 @@ async def lifespan(app: FastAPI):
 app = FastAPI(lifespan=lifespan)
 
 
-app.add_exception_handler(
-    RequestValidationError,
-    validation_exception_handler)
+app.add_exception_handler(RequestValidationError, validation_exception_handler)
+
+app.add_exception_handler(ValidationError, validation_exception_handler)
 
 
 app.include_router(router_auth)
