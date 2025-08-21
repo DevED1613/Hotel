@@ -1,8 +1,10 @@
 from datetime import date
+from typing import Any
 
 from src.exceptions import (
     DateIncorrectException,
     HotelNotFoundException,
+    ObjectAlreadyExistsException,
     ObjectNotFoundException,
     RoomNotFoundException,
 )
@@ -16,6 +18,12 @@ class BaseService:
     def __init__(self, db: DBManager | None = None) -> None:
         self.db = db
 
+    async def _check_object_exists(
+        self, model_repository: DBManager, **filter_by: Any
+    ) -> None:
+        if await model_repository.get_one_or_none(**filter_by):
+            raise ObjectAlreadyExistsException
+
 
 class DataCheckService:
     @staticmethod
@@ -25,10 +33,10 @@ class DataCheckService:
             raise DateIncorrectException
 
     @staticmethod
-    async def check_hotel_exists(hotel_id: int, db: DBManager) -> None:
+    async def check_hotel_exists(db: DBManager, **filter_by: Any) -> None:
         """Проверка существования отеля"""
         try:
-            await db.hotels.get_one(id=hotel_id)
+            await db.hotels.get_one(**filter_by)
         except ObjectNotFoundException as ex:
             raise HotelNotFoundException from ex
 
