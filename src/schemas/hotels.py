@@ -18,4 +18,3 @@ class HotelPatch(BaseModel):
 
     class Config:
         from_attributes = True
-        

@@ -1,18 +1,11 @@
 from datetime import date
 
-from src.exceptions import EmptyValueException, ObjectAlreadyExistsException
+from src.exceptions import ObjectAlreadyExistsException
 from src.schemas.hotels import HotelAdd, HotelPatch
 from src.services.base import BaseService, DataCheckService
 
 
 class HotelService(BaseService):
-
-    async def check_hotel_exists(self, hotel_data):
-        if await self.db.hotels.get_one(
-            title=hotel_data.title, location=hotel_data.location
-        ):
-            raise ObjectAlreadyExistsException
-
     async def get_filtered_by_time(
         self,
         pagintation,
@@ -37,7 +30,11 @@ class HotelService(BaseService):
         return await self.db.hotels.get_one(id=hotel_id)
 
     async def add_hotel(self, hotel_data: HotelAdd):
-        if await self.check_hotel_exists(hotel_data):
+        if await self._check_object_exists(
+            model_repository=self.db.hotels,
+            title=hotel_data.title,
+            location=hotel_data.location,
+        ):
             raise ObjectAlreadyExistsException
         new_hotel = await self.db.hotels.add(hotel_data)
         await self.db.commit()
@@ -46,16 +43,20 @@ class HotelService(BaseService):
     async def edit_hotel(
         self, hotel_data: HotelAdd, hotel_id: int, exclude_unset: bool = False
     ):
-        updated_hotel = await self.db.hotels.edit(hotel_data, id=hotel_id, exclude_unset=exclude_unset)
+        updated_hotel = await self.db.hotels.edit(
+            hotel_data, id=hotel_id, exclude_unset=exclude_unset
+        )
         await self.db.commit()
         return updated_hotel
 
     async def patch_hotel(
         self, hotel_data: HotelPatch, hotel_id: int, exclude_unset: bool = True
     ):
-        updated_hotel = await self.db.hotels.patch(hotel_data, id=hotel_id, exclude_unset=exclude_unset)
+        updated_hotel = await self.db.hotels.patch(
+            hotel_data, id=hotel_id, exclude_unset=exclude_unset
+        )
         await self.db.commit()
-        # return updated_hotel
+        return updated_hotel
 
     async def delete_hotel(self, hotel_id: int):
         await self.db.hotels.delete(id=hotel_id)
