@@ -1,5 +1,4 @@
-import logging
-from src.exceptions import AlreadyExistsError, EmptyValueException, ObjectNotFoundException
+from src.exceptions import AlreadyExistsError, ObjectNotFoundException
 from src.schemas.facilities import FacilityAdd
 from src.services.base import BaseService
 from src.tasks.task import test_task
@@ -20,7 +19,7 @@ class FacilityService(BaseService):
 
     async def delete_facility(self, facility_id: int):
         try:
-            deleted = await self.db.facilities.delete(id=facility_id)
+            await self.db.facilities.delete(id=facility_id)
         except ObjectNotFoundException as ex:
             raise ObjectNotFoundException from ex
         await self.db.commit()

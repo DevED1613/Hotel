@@ -9,7 +9,6 @@ from src.exceptions import (
 from src.api.dependencies import DBDep
 from src.schemas.facilities import FacilityAdd
 from src.services.facilities import FacilityService
-from src.tasks.task import test_task
 
 router = APIRouter(prefix="/facilities", tags=["Удобства"])
 
@@ -17,7 +16,8 @@ router = APIRouter(prefix="/facilities", tags=["Удобства"])
 @router.get("")
 @cache(expire=15)
 async def get_all_facilities(db: DBDep):
-    return await FacilityService(db).get_all_facilities()
+    facilieties = await FacilityService(db).get_all_facilities()
+    return {"data": facilieties}
 
 
 @router.post("")
