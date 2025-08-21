@@ -35,7 +35,7 @@ async def login_user(data: UserRequestAdd, responce: Response, db: DBDep):
     return {"access_token": access_token}
 
 
-@router.get("/only_auth")
+@router.get("/me")
 async def only_auth(user_id: UserIdDep, db: DBDep):
     user = await db.users.get_one_or_none(id=user_id)
     return user
